@@ -1,5 +1,6 @@
 import NextAuth from "next-auth"
 import authConfig from "@/auth.config"
+import { NextResponse } from "next/server";
 
 const { auth } = NextAuth(authConfig);
 import {
@@ -23,17 +24,17 @@ export default auth((req) => {
   console.log("IsAPiAuthRoute", isApiAuthRoute)
   console.log("Auth route is: ", isAuthRoute)
   if(isApiAuthRoute){
-    return null;
+    return NextResponse.next();
   };
   
   if(isAuthRoute){
     console.log("Auth route is: ", isAuthRoute)
     if(isLogedIn){
-      return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
+      return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
     }
-    return null;
+    return NextResponse.next();
   }
-  if( isLogedIn && nextUrl.pathname === "/") return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT_CLIENT, nextUrl));
+  if( isLogedIn && nextUrl.pathname === "/") return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT_CLIENT, nextUrl));
 
 
   if(!isLogedIn && !isPublicRoute){
@@ -44,13 +45,13 @@ export default auth((req) => {
 
     const encodedCallbackUrl = encodeURIComponent(callbackUrl);
     console.log("Redirecting to Login: ", `/auth/login?${encodedCallbackUrl}`)
-    return Response.redirect(new URL(
+    return NextResponse.redirect(new URL(
       `/auth/login?callbackUrl=${encodedCallbackUrl}`,
        nextUrl
     ));
   }
 
-  return null; //Means:  Allow It!! Don't do anything if the user is logged in and trying to access a public route.
+  return NextResponse.next(); //Means:  Allow It!! Don't do anything if the user is logged in and trying to access a public route.
 
 })
 
